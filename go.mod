@@ -1,3 +1,3 @@
-module github.com/ajpikul-com/server_utilities
+module github.com/ajpikul-com/server_utils
 
 go 1.20
