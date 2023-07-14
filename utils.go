@@ -2,6 +2,8 @@ package server_utils
 
 import (
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strconv"
 
 	"github.com/ajpikul-com/ilog"
@@ -14,7 +16,7 @@ var defaultLogger ilog.LoggerInterface
 
 // Establish a default logger
 func init() {
-	if defaulLogger == nil {
+	if defaultLogger == nil {
 		defaultLogger = new(ilog.EmptyLogger)
 	}
 }
