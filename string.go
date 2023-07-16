@@ -5,7 +5,7 @@ import (
 )
 
 type StringHandler struct {
-	val string
+	Val string
 }
 
 func (sh StringHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
