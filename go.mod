@@ -1,4 +1,4 @@
-module github.com/ajpikul-com/server_utils
+module github.com/ajpikul-com/sutils
 
 go 1.20
 
