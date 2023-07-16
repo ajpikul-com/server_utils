@@ -1,4 +1,4 @@
-package server_utils
+package sutils
 
 import (
 	"github.com/ajpikul-com/ilog"
