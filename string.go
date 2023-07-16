@@ -10,7 +10,7 @@ type StringHandler struct {
 
 func (sh StringHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	_, err := w.Write([]byte(sh.val))
+	_, err := w.Write([]byte(sh.Val))
 	if err != nil {
 		panic(err)
 	}
