@@ -66,3 +66,9 @@ func NewSingleHostReverseProxy(target string) (*ReverseProxy, error) {
 		Handler: httputil.NewSingleHostReverseProxy(targetURL),
 	}, nil
 }
+
+type HandlerItself func(http.ResponseWriter, *http.Request)
+
+func (h *HandlerItself) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	(*h)(w, r)
+}
