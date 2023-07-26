@@ -1,9 +1,26 @@
-There are only two really useful functions in here:
+# Utilities
 
-`RedirectSchemeHandler(scheme string, code int) http.Handler`
+#### `FormatRequest(r *http.Request) string`
 
-Which will respond to any request at the path it's assigned to with a response code and the same exactly URL except with the scheme specified (ie changing HTTP to HTTPS)
+Dumps Request
 
-`NewSingleHostReverseProxy(target string)` which will change whatever path it's put on to target, but really without the user ever seeing, always passing through the rest of the URL.
+#### `HandlerItself func(http.ResponseWriter, *http.Request)`
 
-TODO: add all, this is out of data
+Convert a `func(http.ResponseWriter, *http.Request)` to `HandlerItself` to so that it becomes a self-calling `http.Handler`
+
+#### `RedirectSchemeHandler(scheme string, code int) http.Handler`
+
+Tells requests to always use correct `scheme`.
+
+#### `NewSingleHostReverseProxy(target string) (*ReverseProxy, err)`
+
+Redirects everything behind-the-scenes to `target`
+
+#### `StringHandler struct`
+```go
+type StringHandler struct {
+	Val string
+}
+```
+
+Will serve `Val` as a webpage
