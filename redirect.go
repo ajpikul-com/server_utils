@@ -33,25 +33,21 @@ type urlRewriteHandler struct {
 	rewrite  string
 	code     int
 	compiled *regexp.Regexp
-	handler  http.Handler
 }
 
 // ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
 func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.prefix)
 	newURL := r.URL
 	newURL.Host = urw.compiled.ReplaceAllString(r.URL.Host, urw.rewrite)
-	if newURL.Host != r.URL.Host {
-		http.Redirect(w, r, newURL.String(), urw.code)
-		return
-	}
-	urw.handler.ServeHTTP(w, r)
-
+	defaultLogger.Info("New string: " + newURL.String())
+	http.Redirect(w, r, newURL.String(), urw.code)
 }
 
 // URLRewriteHandler returns a new http.Handler
-func URLRewriteHandler(prefix string, rewrite string, code int, handler http.Handler) http.Handler {
+func URLRewriteHandler(prefix string, rewrite string, code int) http.Handler {
 	compiled := regexp.MustCompile(`(?i)^` + prefix)
-	return &urlRewriteHandler{prefix, rewrite, code, compiled, handler}
+	return &urlRewriteHandler{prefix, rewrite, code, compiled}
 }
 
 /*
