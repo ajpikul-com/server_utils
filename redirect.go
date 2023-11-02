@@ -2,6 +2,7 @@ package sutils
 
 import (
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 )
@@ -15,7 +16,7 @@ type redirectSchemeHandler struct {
 // ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
 func (rsh *redirectSchemeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newURL := r.URL
-	if r.URL.IsAbs() == false {
+	if r.URL.IsAbs() == false { // TODO because we need to copY?
 		r.URL.Host = r.Host
 	}
 	newURL.Scheme = rsh.scheme
@@ -38,7 +39,8 @@ type urlRewriteHandler struct {
 // ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
 func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.rewrite)
-	newURL := r.URL
+	newURL := new(url.URL)
+	*newURL = *r.URL
 	newURL.Host = urw.compiled.ReplaceAllString(r.URL.Host, urw.rewrite)
 	defaultLogger.Info("New string: " + newURL.String())
 	http.Redirect(w, r, newURL.String(), urw.code)
