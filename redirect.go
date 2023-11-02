@@ -37,7 +37,7 @@ type urlRewriteHandler struct {
 
 // ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
 func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.prefix)
+	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.rewrite)
 	newURL := r.URL
 	newURL.Host = urw.compiled.ReplaceAllString(r.URL.Host, urw.rewrite)
 	defaultLogger.Info("New string: " + newURL.String())
