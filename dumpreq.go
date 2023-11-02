@@ -4,7 +4,21 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/kr/pretty"
 )
+
+type Dumper struct{}
+
+func (d *Dumper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	output := FormatRequest(r)
+	output2 := fmt.Sprintf("%# v", pretty.Formatter(r))
+
+	w.Write([]byte(output))
+	w.Write([]byte("\n\n\n\n"))
+	w.Write([]byte(output2))
+	w.(http.Flusher).Flush()
+}
 
 // FormatRequest generates ascii representation of a request
 func FormatRequest(r *http.Request) string {

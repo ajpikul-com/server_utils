@@ -15,12 +15,9 @@ type redirectSchemeHandler struct {
 
 // ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
 func (rsh *redirectSchemeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	newURL := r.URL
-	if r.URL.IsAbs() == false { // r.URL is just broken
-		r.URL.Host = r.Host
-	}
-	newURL.Scheme = rsh.scheme
-	http.Redirect(w, r, newURL.String(), rsh.code)
+	r.URL.Host = r.Host
+	r.URL.Scheme = rsh.scheme
+	http.Redirect(w, r, r.URL.String(), rsh.code)
 }
 
 // RedirectSchemeHandler returns a new http.Handler
@@ -37,19 +34,18 @@ type urlRewriteHandler struct {
 	pathprefix string
 }
 
-// ServeHTTP rewrites the requests URL and appropriately and then calls Redirect.
+// ServeHTTP takes regex to match a domain, replace found regex with rewrite, and adds path prefix to path
 func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.rewrite)
 	newURL := new(url.URL)
-	if r.URL.IsAbs() == false { // r.URL is just broken
-		r.URL.Host = r.Host
-	}
-	defaultLogger.Info("Old URL: " + r.URL.String())
 	*newURL = *r.URL
-	defaultLogger.Info("Old URL COPY: " + newURL.String())
 	newURL.Host = urw.compiled.ReplaceAllString(r.URL.Host, urw.rewrite)
 	if urw.pathprefix != "" {
-		newURL.Path = "/" + urw.pathprefix + newURL.Path
+		if newURL.Path[0] != '/' {
+			newURL.Path = urw.pathprefix + "/ " + newURL.Path
+		} else {
+			newURL.Path = urw.pathprefix + newURL.Path
+		}
 	}
 	defaultLogger.Info("New string: " + newURL.String())
 	http.Redirect(w, r, newURL.String(), urw.code)
@@ -57,7 +53,7 @@ func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 // URLRewriteHandler returns a new http.Handler
 func URLRewriteHandler(prefix string, rewrite string, pathprefix string, code int) http.Handler {
-	compiled := regexp.MustCompile(`(?i)^` + prefix)
+	compiled := regexp.MustCompile(`(?i)` + prefix)
 	return &urlRewriteHandler{prefix, rewrite, code, compiled, pathprefix}
 }
 
