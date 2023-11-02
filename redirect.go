@@ -2,8 +2,6 @@ package sutils
 
 import (
 	"net/http"
-	"net/url"
-	"regexp"
 	"strconv"
 )
 
@@ -26,35 +24,38 @@ func RedirectSchemeHandler(scheme string, code int) http.Handler {
 	return &redirectSchemeHandler{scheme, code}
 }
 
-type urlRewriteHandler struct {
-	prefix     string
-	rewrite    string
+type HostRewriteHandler struct {
+	toHost     string
 	code       int
-	compiled   *regexp.Regexp
 	pathprefix string
 }
 
 // ServeHTTP takes regex to match a domain, replace found regex with rewrite, and adds path prefix to path
-func (urw *urlRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	defaultLogger.Info("Rewriting " + urw.prefix + " to " + urw.rewrite)
-	newURL := new(url.URL)
-	*newURL = *r.URL
-	newURL.Host = urw.compiled.ReplaceAllString(r.URL.Host, urw.rewrite)
-	if urw.pathprefix != "" {
-		if newURL.Path[0] != '/' {
-			newURL.Path = urw.pathprefix + "/ " + newURL.Path
+func (hrw *HostRewriteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r.URL.Host = hrw.toHost
+	if hrw.pathprefix != "" {
+		if r.URL.Path[0] != '/' {
+			r.URL.Path = hrw.pathprefix + "/ " + r.URL.Path
 		} else {
-			newURL.Path = urw.pathprefix + newURL.Path
+			r.URL.Path = hrw.pathprefix + r.URL.Path
 		}
 	}
-	defaultLogger.Info("New string: " + newURL.String())
-	http.Redirect(w, r, newURL.String(), urw.code)
+	defaultLogger.Info("New string: " + r.URL.String())
+	http.Redirect(w, r, r.URL.String(), hrw.code)
 }
 
-// URLRewriteHandler returns a new http.Handler
-func URLRewriteHandler(prefix string, rewrite string, pathprefix string, code int) http.Handler {
-	compiled := regexp.MustCompile(`(?i)` + prefix)
-	return &urlRewriteHandler{prefix, rewrite, code, compiled, pathprefix}
+// HostRewriteHandler returns a new http.Handler
+func NewHostRewriteHandler(toHost string, pathprefix string, code int) http.Handler {
+	return &HostRewriteHandler{toHost, code, pathprefix}
+}
+
+type RedirectHandler struct {
+	Path string
+	Code int
+}
+
+func (rh *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, rh.Path, rh.Code)
 }
 
 /*
